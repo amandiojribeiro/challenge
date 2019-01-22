@@ -1,5 +1,4 @@
-﻿using Domain.Model.Comments;
-using Domain.Model.Enums;
+﻿using Domain.Model.Enums;
 using System.Collections.Generic;
 
 namespace Domain.Model

@@ -27,7 +27,7 @@ namespace Domain.Services.CommentActionStrategy.Strategies
             switch (type)
             {
                 case ActiontType.Edit:
-                    var authorId = comment.Actions.Where(x => x.Type == ActiontType.Add).FirstOrDefault().UserId;
+                    var authorId = comment.Actions.Where(x => x.Action == ActiontType.Add).FirstOrDefault().UserId;
                     if (CurrentUserId != authorId)
                     {
                         comment.State = CommentState.Rejected;

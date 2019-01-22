@@ -1,4 +1,4 @@
-﻿namespace Domain.Model.Comments
+﻿namespace Domain.Model
 {
     public class RelatedComments
     {

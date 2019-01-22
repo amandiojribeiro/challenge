@@ -9,7 +9,7 @@ namespace Domain.Model
 
         public int CommentId { get; set; }
 
-        public ActiontType Type { get; set; }
+        public ActiontType Action { get; set; }
 
         public DateTime Date { get; set; }
 
