@@ -1,9 +1,9 @@
 ﻿namespace Domain.Model.Enums
 {
-    public enum CommentState
+    public enum CommentState :int 
     {
-        Accepted,
-        Cancelled,
-        Rejected,
+        Accepted = 0,
+        Cancelled = 1,
+        Rejected = 2,
     }
 }

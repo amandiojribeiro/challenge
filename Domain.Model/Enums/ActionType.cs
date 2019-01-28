@@ -1,9 +1,9 @@
 ﻿namespace Domain.Model.Enums
 {
-    public enum ActiontType
+    public enum ActiontType : int
     {
-        Add,
-        Edit,
-        Delete
+        Add = 0,
+        Edit = 1,
+        Delete = 2
     }
 }

@@ -6,12 +6,15 @@ using Domain.Services.Services;
 using Infrastructure.Crosscuting;
 using Infrastructure.Crosscuting.Adapters.Automapper;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Presentation.Api.Model;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Threading.Tasks;
 
@@ -57,7 +60,8 @@ namespace Presentation.Api
                 c.SwaggerDoc("v1", new Info { Title = "Challenge Service", Version = "v1" });
             });
 
-            services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultTokenProviders();
+            services.AddIdentity<User, Role>().AddDefaultTokenProviders();
+
             services.ConfigureApplicationCookie(cfg =>
                 cfg.Events = new CookieAuthenticationEvents
                 {
@@ -69,6 +73,13 @@ namespace Presentation.Api
                         return Task.FromResult(0);
                     }
                 });
+
+            services.AddAuthorization(auth =>
+            {
+                auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser().Build());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -89,6 +100,8 @@ namespace Presentation.Api
             });
 
             app.UseMvc();
+
+            app.UseAuthentication();
         }
     }
 }

@@ -2,8 +2,8 @@
 {
     public class RelatedComments
     {
-        public int Id { get; set;}
+        public int CommentId { get; set;}
 
-        public int RelatedId { get; set; }
+        public int RelatedCommentId { get; set; }
     }
 }

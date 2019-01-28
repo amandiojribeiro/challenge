@@ -1,9 +1,9 @@
 ﻿namespace Domain.Model.Enums
 {
-    public enum AuthorType
+    public enum AuthorType : int
     {
-        User,
-        Moderator,
-        Administrator
+        User = 0,
+        Moderator = 1,
+        Administrator = 2
     }
 }

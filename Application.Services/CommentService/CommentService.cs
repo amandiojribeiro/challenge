@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Dto;
 using Domain.Core.RepositoryInterfaces;
@@ -33,26 +34,26 @@ namespace Application.Services.CommentService
             this._relatedCommentsRepository = relatedCommentsRepository;
         }
         
-        public async Task<CommentDto> AddComment(CommentDto comment, AuthorType authorType)
+        public async Task<CommentDto> AddComment(CommentDto comment, AuthorType authorType, int userId)
         {
             var commentFromDto = TypeAdapterHelper.Adapt<Comment>(comment);
 
-            this._commentStateService.CalculateState(commentFromDto, comment.UserId, ActiontType.Add, authorType);
+            this._commentStateService.CalculateState(commentFromDto, userId, ActiontType.Add, authorType);
 
             if (commentFromDto.State == CommentState.Accepted)
             {
                 this._commentRepository.Add(commentFromDto);
-                var action = new CommentActions() { CommentId = commentFromDto.Id, Action = ActiontType.Add, UserId = comment.UserId };
+                var action = new CommentActions() { CommentId = commentFromDto.Id, Action = ActiontType.Add, UserId = userId };
                 this._commentActionsRepository.Add(action);
             }
 
             return await Task.FromResult<CommentDto>(TypeAdapterHelper.Adapt<CommentDto>(commentFromDto));
         }
 
-        public async Task<bool> DeleteComment(CommentDto comment, AuthorType authorType)
+        public async Task<bool> DeleteComment(CommentDto comment, AuthorType authorType, int userId)
         {
             var operationResult = true;
-            var result = this._commentRepository.Find(x => x.Id == comment.Id);
+            var result = await this._commentRepository.GetCommentById(comment.Id);
 
             if (result == null)
             {
@@ -61,12 +62,12 @@ namespace Application.Services.CommentService
             }
             else
             {
-                this._commentStateService.CalculateState(result, comment.UserId, ActiontType.Delete, authorType);
+                this._commentStateService.CalculateState(result, userId, ActiontType.Delete, authorType);
 
                 if (result.State == CommentState.Accepted)
                 {
                     this._commentRepository.Delete(result);
-                    var action = new CommentActions() { CommentId = comment.Id, Action = ActiontType.Delete, UserId = comment.UserId };
+                    var action = new CommentActions() { CommentId = comment.Id, Action = ActiontType.Delete, UserId = userId };
                     this._commentActionsRepository.Add(action);
                 }
             }
@@ -74,9 +75,9 @@ namespace Application.Services.CommentService
             return await Task.FromResult<bool>(operationResult);
         }
 
-        public async Task<CommentDto> EditComment(CommentDto comment, AuthorType authorType)
+        public async Task<CommentDto> EditComment(CommentDto comment, AuthorType authorType, int userId)
         {
-            var result = this._commentRepository.Find(x => x.Id == comment.Id);
+            var result = await this._commentRepository.GetCommentById(comment.Id);
 
             if( result == null)
             {
@@ -84,13 +85,13 @@ namespace Application.Services.CommentService
             }
             else
             {
-                 this._commentStateService.CalculateState(result, comment.UserId, ActiontType.Edit, authorType);
+                 this._commentStateService.CalculateState(result, userId, ActiontType.Edit, authorType);
 
                 if (result.State == CommentState.Accepted)
                 {
                     result.Message = comment.Message;
                     this._commentRepository.Update(result);
-                    var action = new CommentActions() { CommentId = result.Id, Action = ActiontType.Edit, UserId = comment.UserId };
+                    var action = new CommentActions() { CommentId = result.Id, Action = ActiontType.Edit, UserId = userId };
                     this._commentActionsRepository.Add(action);
                 }
             }
@@ -98,10 +99,21 @@ namespace Application.Services.CommentService
             return await Task.FromResult<CommentDto>(TypeAdapterHelper.Adapt<CommentDto>(result));
         }
 
-        public async Task<CommentDto> ReplyToComment(CommentDto comment, AuthorType authorType, int parentId)
+        public Task<List<CommentDto>> GetAllComments()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<CommentDto> GetComment(int id)
+        {
+            var result = await this._commentRepository.GetCommentById(id);
+            return await Task.FromResult<CommentDto>(TypeAdapterHelper.Adapt<CommentDto>(result));
+        }
+
+        public async Task<CommentDto> ReplyToComment(CommentDto comment, AuthorType authorType, int parentId, int userId)
         {
             var commentFromDto = TypeAdapterHelper.Adapt<Comment>(comment);
-            var result = this._commentRepository.Find(x => x.Id == parentId);
+            var result = await this._commentRepository.GetCommentById(comment.Id);
 
             if (result == null)
             {
@@ -109,14 +121,14 @@ namespace Application.Services.CommentService
             }
             else
             {
-                this._commentStateService.CalculateState(commentFromDto, comment.UserId, ActiontType.Add, authorType);
+                this._commentStateService.CalculateState(commentFromDto, userId, ActiontType.Add, authorType);
 
                 if (commentFromDto.State == CommentState.Accepted)
                 {
                     this._commentRepository.Add(commentFromDto);
-                    var action = new CommentActions() { CommentId = commentFromDto.Id, Action = ActiontType.Add, UserId = comment.UserId };
+                    var action = new CommentActions() { CommentId = commentFromDto.Id, Action = ActiontType.Add, UserId = userId };
                     this._commentActionsRepository.Add(action);
-                    var relatedComment = new RelatedComments() { Id = parentId, RelatedId = commentFromDto.Id };
+                    var relatedComment = new RelatedComments() { CommentId = parentId, RelatedCommentId = commentFromDto.Id };
                     this._relatedCommentsRepository.Add(relatedComment);
                 }
             }

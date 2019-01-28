@@ -16,7 +16,6 @@ namespace Application.Services.TypeAdatpters
             CreateMap<CommentDto, Comment>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(e => e.Id))
             .ForMember(dest => dest.Message, opt => opt.MapFrom(e => e.Message))
-            .ForMember(dest => dest.State, opt => opt.MapFrom(e => e.State))
             .ReverseMap();
         }
     }

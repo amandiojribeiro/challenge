@@ -8,6 +8,8 @@ namespace Domain.Services.Services
     {
         private readonly CommentActionStrategyFactory _commentActionStrategyFactory;
 
+        public CommentStateService() : this(new CommentActionStrategyFactory()) { }
+
         public CommentStateService(CommentActionStrategyFactory commentActionStrategyFactory)
         {
             this._commentActionStrategyFactory = commentActionStrategyFactory;
