@@ -113,7 +113,7 @@ namespace Application.Services.CommentService
         public async Task<CommentDto> ReplyToComment(CommentDto comment, AuthorType authorType, int parentId, int userId)
         {
             var commentFromDto = TypeAdapterHelper.Adapt<Comment>(comment);
-            var result = await this._commentRepository.GetCommentById(comment.Id);
+            var result = await this._commentRepository.GetCommentById(parentId);
 
             if (result == null)
             {
