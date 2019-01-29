@@ -63,39 +63,33 @@ namespace Presentation.Api
             });
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                     .AddJwtBearer(options => {
-                         options.TokenValidationParameters = new TokenValidationParameters
-                         {
-                             ValidateIssuer = true,
-                             ValidateAudience = true,
-                             ValidateLifetime = true,
-                             ValidateIssuerSigningKey = true,
+                .AddJwtBearer(options => {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
 
-                             ValidIssuer = "Fiver.Security.Bearer",
-                             ValidAudience = "Fiver.Security.Bearer",
-                             IssuerSigningKey = JwtSecurityKey.Create("YouCannotAlterTokenIfYouCannotHoldThisVeryLongKey")
-                         };
+                        ValidIssuer = "Fiver.Security.Bearer",
+                        ValidAudience = "Fiver.Security.Bearer",
+                        IssuerSigningKey = JwtSecurityKey.Create("YouCannotAlterTokenIfYouCannotHoldThisVeryLongKey")
+                    };
 
-                         options.Events = new JwtBearerEvents
-                         {
-                             OnAuthenticationFailed = context =>
-                             {
-                                 Console.WriteLine("OnAuthenticationFailed: " + context.Exception.Message);
-                                 return Task.CompletedTask;
-                             },
-                             OnTokenValidated = context =>
-                             {
-                                 Console.WriteLine("OnTokenValidated: " + context.SecurityToken);
-                                 return Task.CompletedTask;
-                             }
-                         };
-                     });
-
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("Member",
-                    policy => policy.RequireClaim("MembershipId"));
-            });
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnAuthenticationFailed = context =>
+                        {
+                            Console.WriteLine("OnAuthenticationFailed: " + context.Exception.Message);
+                            return Task.CompletedTask;
+                        },
+                        OnTokenValidated = context =>
+                        {
+                            Console.WriteLine("OnTokenValidated: " + context.SecurityToken);
+                            return Task.CompletedTask;
+                        }
+                    };
+             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

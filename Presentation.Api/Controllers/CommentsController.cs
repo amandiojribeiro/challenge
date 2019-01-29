@@ -1,15 +1,13 @@
 ﻿using Application.Services.CommentService;
 using Domain.Model.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.Api.Filters;
-using Presentation.Api.Model;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Presentation.Api.Controllers
 {
-    [Authorize(Policy = "Member")]
+    [Authorize]
     [Route("api/[controller]")]
     public class CommentsController : Controller
     {
@@ -21,7 +19,7 @@ namespace Presentation.Api.Controllers
         }
 
         // POST comment
-       
+        [Authorize(Roles = "0,2")]
         [HttpPost("{message}")]
         public async Task<IActionResult> Post(string message)
         {
@@ -70,6 +68,7 @@ namespace Presentation.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
+            var role = await GetAuthorType();
             var result = await this.commentService.GetComment(id);
 
             if (result != null)
@@ -97,10 +96,9 @@ namespace Presentation.Api.Controllers
 
         private async Task<AuthorType> GetAuthorType()
         {
-            //var user = await _userManager.GetUserAsync(HttpContext.User);
-            //var role = await _userManager.GetRolesAsync(user);
-            //return (AuthorType) int.Parse(role.FirstOrDefault());
-            return await Task.FromResult<AuthorType>(AuthorType.User);
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var userRole = claimsIdentity.FindFirst(ClaimTypes.Role)?.Value;
+            return await Task.FromResult<AuthorType> ((AuthorType) int.Parse(userRole));
         }
     }
 }

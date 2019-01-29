@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -6,13 +10,6 @@ using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using Application.Dto;
-using Application.Services.CommentService;
-using Domain.Model.Enums;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Presentation.Api.Controllers
 {
@@ -38,13 +35,13 @@ namespace Presentation.Api.Controllers
             switch (password)
             {
                 case "123":
-                    userRoles = new string[] { "1" }; 
+                    userRoles = new string[] { "0" }; 
                     break;
                 case "456":
-                    userRoles = new string[] { "2" };
+                    userRoles = new string[] { "1" };
                     break;
                 case "789":
-                    userRoles = new string[] { "3" }; 
+                    userRoles = new string[] { "2" }; 
                     break;
 
             }
@@ -54,11 +51,8 @@ namespace Presentation.Api.Controllers
                 if (email == "admin@admin.com")
                 {
                     var fakeClaims = new List<Claim>();
-                    fakeClaims.Add(new Claim("MembershipId", "111"));
-                    var userIdentity = new ClaimsIdentity(fakeClaims);
-                    userRoles.ToList().ForEach((role) => userIdentity.AddClaim(new Claim(ClaimTypes.Role, role)));
-
-                    var userClaims = fakeClaims;
+                    fakeClaims.Add(new Claim(ClaimTypes.Name, email));
+                    userRoles.ToList().ForEach((role) => fakeClaims.Add(new Claim(ClaimTypes.Role, role)));
 
                     var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YouCannotAlterTokenIfYouCannotHoldThisVeryLongKey"));
                     var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
@@ -67,7 +61,7 @@ namespace Presentation.Api.Controllers
                     var jwtSecurityToken = new JwtSecurityToken(
                      issuer: "Fiver.Security.Bearer",
                      audience: "Fiver.Security.Bearer",
-                     claims: userClaims,
+                     claims: fakeClaims,
                      expires: DateTime.UtcNow.AddMinutes(60),
                      signingCredentials: signingCredentials);
 

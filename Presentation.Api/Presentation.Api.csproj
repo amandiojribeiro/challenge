@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <Compile Remove="Controllers\ValuesController.cs" />
+    <Compile Remove="Model\Role.cs" />
+    <Compile Remove="Model\User.cs" />
   </ItemGroup>
 
   <ItemGroup>
