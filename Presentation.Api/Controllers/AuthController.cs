@@ -54,8 +54,7 @@ namespace Presentation.Api.Controllers
                 if (email == "admin@admin.com")
                 {
                     var fakeClaims = new List<Claim>();
-                    fakeClaims.Add(new Claim(ClaimTypes.Name, "Zé do Boné"));
-                    fakeClaims.Add(new Claim(ClaimTypes.Email, email));
+                    fakeClaims.Add(new Claim("MembershipId", "111"));
                     var userIdentity = new ClaimsIdentity(fakeClaims);
                     userRoles.ToList().ForEach((role) => userIdentity.AddClaim(new Claim(ClaimTypes.Role, role)));
 
@@ -66,8 +65,8 @@ namespace Presentation.Api.Controllers
 
 
                     var jwtSecurityToken = new JwtSecurityToken(
-                     issuer: "Me",
-                     audience: "NotGoucha",
+                     issuer: "Fiver.Security.Bearer",
+                     audience: "Fiver.Security.Bearer",
                      claims: userClaims,
                      expires: DateTime.UtcNow.AddMinutes(60),
                      signingCredentials: signingCredentials);

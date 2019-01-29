@@ -14,8 +14,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Presentation.Api.Model;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
 using System.Threading.Tasks;
 
 namespace Presentation.Api
@@ -60,25 +62,39 @@ namespace Presentation.Api
                 c.SwaggerDoc("v1", new Info { Title = "Challenge Service", Version = "v1" });
             });
 
-            services.AddIdentity<User, Role>().AddDefaultTokenProviders();
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                     .AddJwtBearer(options => {
+                         options.TokenValidationParameters = new TokenValidationParameters
+                         {
+                             ValidateIssuer = true,
+                             ValidateAudience = true,
+                             ValidateLifetime = true,
+                             ValidateIssuerSigningKey = true,
 
-            services.ConfigureApplicationCookie(cfg =>
-                cfg.Events = new CookieAuthenticationEvents
-                {
-                    OnRedirectToLogin = ctx =>
-                    {
-                        if (ctx.Request.Path.StartsWithSegments("/api"))
-                            ctx.Response.StatusCode = (int)System.Net.HttpStatusCode.Unauthorized;
+                             ValidIssuer = "Fiver.Security.Bearer",
+                             ValidAudience = "Fiver.Security.Bearer",
+                             IssuerSigningKey = JwtSecurityKey.Create("YouCannotAlterTokenIfYouCannotHoldThisVeryLongKey")
+                         };
 
-                        return Task.FromResult(0);
-                    }
-                });
+                         options.Events = new JwtBearerEvents
+                         {
+                             OnAuthenticationFailed = context =>
+                             {
+                                 Console.WriteLine("OnAuthenticationFailed: " + context.Exception.Message);
+                                 return Task.CompletedTask;
+                             },
+                             OnTokenValidated = context =>
+                             {
+                                 Console.WriteLine("OnTokenValidated: " + context.SecurityToken);
+                                 return Task.CompletedTask;
+                             }
+                         };
+                     });
 
-            services.AddAuthorization(auth =>
+            services.AddAuthorization(options =>
             {
-                auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
-                    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-                    .RequireAuthenticatedUser().Build());
+                options.AddPolicy("Member",
+                    policy => policy.RequireClaim("MembershipId"));
             });
         }
 
@@ -99,9 +115,9 @@ namespace Presentation.Api
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Challenge Service V1");
             });
 
-            app.UseMvc();
-
             app.UseAuthentication();
+
+            app.UseMvc();
         }
     }
 }
